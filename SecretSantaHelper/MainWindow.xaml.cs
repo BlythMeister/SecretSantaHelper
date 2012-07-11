@@ -21,6 +21,7 @@ namespace SecretSantaHelper
         public MainWindow()
         {
             InitializeComponent();
+            lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
         }
 
         private void btnImport_Click(object sender, RoutedEventArgs e)
@@ -44,14 +45,12 @@ namespace SecretSantaHelper
                         {
                             var participant = new Participant { Name = dataParts[0], EmailAddress = dataParts[1] };
                             participants.Add(participant);
-                            lstParticipants.Items.Add(participant.DisplayValue());
                         }
 
                     }
-                    if (lstParticipants.Items.NeedsRefresh)
-                    {
-                        lstParticipants.Items.Refresh();
-                    }
+
+                    lstParticipants.ItemsSource = null;
+                    lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
                 }
                 catch (Exception ex)
                 {
@@ -63,6 +62,8 @@ namespace SecretSantaHelper
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
             var filePicker = new SaveFileDialog();
+            filePicker.InitialDirectory = "c:\\";
+            filePicker.Filter = "csv files (*.csv)|*.csv";
             if (filePicker.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 try
@@ -76,7 +77,7 @@ namespace SecretSantaHelper
             }
         }
 
-        
+
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
@@ -92,25 +93,24 @@ namespace SecretSantaHelper
             txtEmail.IsEnabled = false;
             txtName.IsEnabled = false;
 
-            if(addClicked)
-            {
-                 if (!participants.Any(participant => participant.EmailAddress == txtEmail.Text))
-                 {
-                     var participant = new Participant {Name = txtName.Text, EmailAddress = txtEmail.Text};
-                     participants.Add(participant);
-                     lstParticipants.Items.Add(participant.DisplayValue());
-                 }else
-                 {
-                     MessageBox.Show("Someone with this address exists already!");
-                 }
-            }
-            else
+            if (addClicked)
             {
                 if (!participants.Any(participant => participant.EmailAddress == txtEmail.Text))
                 {
+                    var participant = new Participant { Name = txtName.Text, EmailAddress = txtEmail.Text };
+                    participants.Add(participant);
+                }
+                else
+                {
+                    MessageBox.Show("Someone with this address exists already!");
+                }
+            }
+            else
+            {
+                if (!participants.Any(participant => participant != selectedParticipant && participant.EmailAddress == txtEmail.Text))
+                {
                     selectedParticipant.EmailAddress = txtEmail.Text;
                     selectedParticipant.Name = txtName.Text;
-                    lstParticipants.SelectedItem = selectedParticipant.DisplayValue();
                     selectedParticipant = null;
                 }
                 else
@@ -120,10 +120,9 @@ namespace SecretSantaHelper
             }
             txtEmail.Text = "";
             txtName.Text = "";
-            if(lstParticipants.Items.NeedsRefresh)
-            {
-                lstParticipants.Items.Refresh();
-            }
+
+            lstParticipants.ItemsSource = null;
+            lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -182,5 +181,80 @@ namespace SecretSantaHelper
             }
         }
 
+        private void btnRemove_Click(object sender, RoutedEventArgs e)
+        {
+            selectedParticipant = participants.FirstOrDefault(participant => participant.DisplayValue() == lstParticipants.SelectedItem.ToString());
+            if (selectedParticipant != null)
+            {
+                participants.Remove(selectedParticipant);
+                lstParticipants.ItemsSource = null;
+                lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
+            }
+        }
+
+        private void btnGo_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO: Validate All Email Addresses!
+
+            var participantsToPair = (from p in participants select p).ToList();
+            var participantsToAssign = (from p in participants select p).ToList();
+            var participantsToSend = new List<PairedParticipant>();
+            var randomGenerator = new Random();
+
+            while (participantsToPair.Count > 0)
+            {
+                if (participantsToAssign.Count == 1 && participantsToPair.Count == 1 && participantsToAssign.First().EmailAddress == participantsToPair.First().EmailAddress)
+                {
+                    participantsToPair = (from p in participants select p).ToList();
+                    participantsToAssign = (from p in participants select p).ToList();
+                    participantsToSend = new List<PairedParticipant>();
+                }
+
+                Participant pairParticipant = null;
+                var assignIndex = randomGenerator.Next(0, participantsToAssign.Count);
+                var assignParticipant = participantsToAssign[assignIndex];
+                participantsToAssign.Remove(assignParticipant);
+                var participantPairing = new PairedParticipant()
+                                             {
+                                                 EmailAddress = assignParticipant.EmailAddress,
+                                                 Name = assignParticipant.Name
+                                             };
+
+                while (pairParticipant == null)
+                {
+                    var pairIndex = randomGenerator.Next(0, participantsToPair.Count);
+                    pairParticipant = participantsToPair[pairIndex];
+                    if (assignParticipant.EmailAddress == pairParticipant.EmailAddress)
+                    {
+                        pairParticipant = null;
+                    }
+                    else
+                    {
+                        participantsToPair.Remove(pairParticipant);
+                        participantPairing.PairedWith = pairParticipant;
+                        participantsToSend.Add(participantPairing);
+                    }
+                }
+
+                var alreadyPaired =
+                    participantsToSend.FirstOrDefault(p => p.PairedWith.EmailAddress == participantPairing.EmailAddress);
+                if(alreadyPaired != null)
+                {
+                    if(alreadyPaired.EmailAddress == participantPairing.PairedWith.EmailAddress)
+                    {
+                        participantsToPair = (from p in participants select p).ToList();
+                        participantsToAssign = (from p in participants select p).ToList();
+                        participantsToSend = new List<PairedParticipant>();
+                    }
+                }
+
+            }
+
+            foreach (var pairedParticipant in participantsToSend)
+            {
+                //TODO: Replace With Send Emails To People!
+                MessageBox.Show(string.Format("{0} will buy for {1}", pairedParticipant.EmailAddress, pairedParticipant.PairedWith.EmailAddress));
+            }
+        }
     }
 }

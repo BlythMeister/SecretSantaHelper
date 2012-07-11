@@ -10,8 +10,8 @@
         <ListBox Height="294" HorizontalAlignment="Left" Margin="12,57,0,0" Name="lstParticipants" VerticalAlignment="Top" Width="381" FontFamily="Calibri" Grid.ColumnSpan="2" />
         <Label Content="Secret Santa Helper" Height="39" HorizontalAlignment="Left" Margin="12,12,0,0" Name="Title" VerticalAlignment="Top" FontFamily="Calibri" FontSize="24" FontWeight="Bold" Width="209" />
         <Button Content="Add New Person" Height="44" HorizontalAlignment="Left" Margin="167,57,0,0" Name="btnAdd" VerticalAlignment="Top" Width="92" FontFamily="Calibri" Grid.Column="1" Click="btnAdd_Click" />
-        <Button Content="Remove Person" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,157,0,0" Name="btnRemove" VerticalAlignment="Top" Width="92" Grid.Column="1" />
-        <Button Content="Choose &amp; Send" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,207,0,0" Name="btnGo" VerticalAlignment="Top" Width="92" Grid.Column="1" />
+        <Button Content="Remove Person" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,157,0,0" Name="btnRemove" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnRemove_Click" />
+        <Button Content="Choose &amp; Send" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,207,0,0" Name="btnGo" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnGo_Click" />
         <Button Content="Export Names" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,307,0,0" Name="btnExport" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnExport_Click" />
         <Button Content="Import Names" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,257,0,0" Name="btnImport" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnImport_Click" />
         <TextBox Height="28" HorizontalAlignment="Right" Margin="0,357,0,0" Name="txtName" VerticalAlignment="Top" Width="163" IsEnabled="False" />
