@@ -195,6 +195,29 @@ namespace SecretSantaHelper
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
+
+            if (string.IsNullOrWhiteSpace(txtPassword.Password))
+            {
+                MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
+                return;
+            }
+
+            try
+            {
+                var bytesToEncode = Encoding.UTF8.GetBytes(txtPassword.Password);
+                var encodedText = Convert.ToBase64String(bytesToEncode);
+                if (encodedText != "U2VjcmV0U2FudGE=")
+                {
+                    MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
+                }
+
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txtFromAddress.Text))
             {
                 MessageBox.Show("You Haven't Entered A From Address");
@@ -284,7 +307,5 @@ namespace SecretSantaHelper
 
             MessageBox.Show("All Emails Have Been Sent");
         }
-
-        
     }
 }
