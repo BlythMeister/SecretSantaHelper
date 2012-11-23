@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
@@ -194,7 +195,27 @@ namespace SecretSantaHelper
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-            //TODO: Validate All Email Addresses!
+            if (string.IsNullOrWhiteSpace(txtFromAddress.Text))
+            {
+                MessageBox.Show("You Haven't Entered A From Address");
+                return;
+            }
+
+            var emailHelper = new RegexUtilities();
+            if (!emailHelper.IsValidEmail(txtFromAddress.Text))
+            {
+                MessageBox.Show("You Haven't Entered A Valid From Address");
+                return;
+            }
+
+            foreach (var participant in participants)
+            {
+                if(!emailHelper.IsValidEmail(participant.EmailAddress))
+                {
+                    MessageBox.Show(participant.Name + " Does Not Have A Valid Email Address");
+                    return;
+                }
+            }
 
             var participantsToPair = (from p in participants select p).ToList();
             var participantsToAssign = (from p in participants select p).ToList();
@@ -252,9 +273,18 @@ namespace SecretSantaHelper
 
             foreach (var pairedParticipant in participantsToSend)
             {
-                //TODO: Replace With Send Emails To People!
-                MessageBox.Show(string.Format("{0} will buy for {1}", pairedParticipant.EmailAddress, pairedParticipant.PairedWith.EmailAddress));
+                var message = new MailMessage();
+                message.From = new MailAddress(txtFromAddress.Text);
+                message.To.Add(new MailAddress(pairedParticipant.EmailAddress));
+                message.Subject = "Your Secret Santa has been selected";
+                message.Body = string.Format("Dear {0}\n\nSanta has selected you to purchase a gift for {1} {2}\n\nRemember:\n- You have a budget of £5 to spend on any gift you wish...the more outrageous, the better ;)\n- Gifts must be labelled and left under the Christmas tree on or before the 7th December\n\nOn 7th December @ The North Laine Pub, Santa’s sack will be out and you will receive your gift\n\nHappy spending!\n\nFrom Santa’s Elf", pairedParticipant.Name, pairedParticipant.PairedWith.Name, pairedParticipant.PairedWith.EmailAddress);
+                var client = new SmtpClient();
+                client.Send(message);
             }
+
+            MessageBox.Show("All Emails Have Been Sent");
         }
+
+        
     }
 }
