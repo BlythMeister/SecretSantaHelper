@@ -93,7 +93,7 @@ namespace SecretSantaHelper
 
             if (addClicked)
             {
-                if (!santaSack.Participants.Any(participant => participant.EmailAddress == txtEmail.Text))
+                if (!santaSack.Participants.Any(participant => participant.EmailAddress.ToLower() == txtEmail.Text.ToLower()))
                 {
                     var participant = new Participant { Name = txtName.Text, EmailAddress = txtEmail.Text };
                     santaSack.Participants.Add(participant);
@@ -106,7 +106,7 @@ namespace SecretSantaHelper
             }
             else
             {
-                if (!santaSack.Participants.Any(participant => participant != selectedParticipant && participant.EmailAddress == txtEmail.Text))
+                if (!santaSack.Participants.Any(participant => participant != selectedParticipant && participant.EmailAddress.ToLower() == txtEmail.Text.ToLower()))
                 {
                     selectedParticipant.EmailAddress = txtEmail.Text;
                     selectedParticipant.Name = txtName.Text;
