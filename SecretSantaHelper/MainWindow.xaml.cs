@@ -15,14 +15,16 @@ namespace SecretSantaHelper
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Participant> participants = new List<Participant>();
+        
         private bool addClicked = false;
         private Participant selectedParticipant;
+        private SantaSack santaSack;
 
         public MainWindow()
         {
             InitializeComponent();
-            lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
+            santaSack = SantaSackSerializer.Deserialize();
+            lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
         }
 
         private void btnImport_Click(object sender, RoutedEventArgs e)
@@ -42,16 +44,16 @@ namespace SecretSantaHelper
                     foreach (var dataLine in dataRead)
                     {
                         var dataParts = dataLine.Split(',');
-                        if (!participants.Any(participant => participant.EmailAddress == dataParts[1]))
+                        if (!santaSack.Participants.Any(participant => participant.EmailAddress == dataParts[1]))
                         {
                             var participant = new Participant { Name = dataParts[0], EmailAddress = dataParts[1] };
-                            participants.Add(participant);
+                            santaSack.Participants.Add(participant);
                         }
 
                     }
 
                     lstParticipants.ItemsSource = null;
-                    lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
+                    lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
                 }
                 catch (Exception ex)
                 {
@@ -69,7 +71,7 @@ namespace SecretSantaHelper
             {
                 try
                 {
-                    File.WriteAllLines(filePicker.FileName, participants.Select(participant => participant.OutputValue()).ToArray());
+                    File.WriteAllLines(filePicker.FileName, santaSack.Participants.Select(participant => participant.OutputValue()).ToArray());
                 }
                 catch (Exception ex)
                 {
@@ -82,6 +84,42 @@ namespace SecretSantaHelper
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            var emailHelper = new RegexUtilities();
+            if(!emailHelper.IsValidEmail(txtEmail.Text))
+            {
+                MessageBox.Show("That is an invalid email address!");
+                return;
+            }
+
+            if (addClicked)
+            {
+                if (!santaSack.Participants.Any(participant => participant.EmailAddress == txtEmail.Text))
+                {
+                    var participant = new Participant { Name = txtName.Text, EmailAddress = txtEmail.Text };
+                    santaSack.Participants.Add(participant);
+                }
+                else
+                {
+                    MessageBox.Show("Someone with this address exists already!");
+                    return;
+                }
+            }
+            else
+            {
+                if (!santaSack.Participants.Any(participant => participant != selectedParticipant && participant.EmailAddress == txtEmail.Text))
+                {
+                    selectedParticipant.EmailAddress = txtEmail.Text;
+                    selectedParticipant.Name = txtName.Text;
+                    selectedParticipant = null;
+                }
+                else
+                {
+                    MessageBox.Show("Someone with this address exists already!");
+                    return;
+                }
+            }
+
+            btnSendDetails.IsEnabled = true;
             btnAdd.IsEnabled = true;
             btnEdit.IsEnabled = true;
             btnRemove.IsEnabled = true;
@@ -93,41 +131,16 @@ namespace SecretSantaHelper
             btnCancel.IsEnabled = false;
             txtEmail.IsEnabled = false;
             txtName.IsEnabled = false;
-
-            if (addClicked)
-            {
-                if (!participants.Any(participant => participant.EmailAddress == txtEmail.Text))
-                {
-                    var participant = new Participant { Name = txtName.Text, EmailAddress = txtEmail.Text };
-                    participants.Add(participant);
-                }
-                else
-                {
-                    MessageBox.Show("Someone with this address exists already!");
-                }
-            }
-            else
-            {
-                if (!participants.Any(participant => participant != selectedParticipant && participant.EmailAddress == txtEmail.Text))
-                {
-                    selectedParticipant.EmailAddress = txtEmail.Text;
-                    selectedParticipant.Name = txtName.Text;
-                    selectedParticipant = null;
-                }
-                else
-                {
-                    MessageBox.Show("Someone with this address exists already!");
-                }
-            }
             txtEmail.Text = "";
             txtName.Text = "";
 
             lstParticipants.ItemsSource = null;
-            lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
+            lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
+            btnSendDetails.IsEnabled = true;
             btnAdd.IsEnabled = true;
             btnEdit.IsEnabled = true;
             btnRemove.IsEnabled = true;
@@ -146,6 +159,7 @@ namespace SecretSantaHelper
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            btnSendDetails.IsEnabled = false;
             btnAdd.IsEnabled = false;
             btnEdit.IsEnabled = false;
             btnRemove.IsEnabled = false;
@@ -162,6 +176,7 @@ namespace SecretSantaHelper
 
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
+            btnSendDetails.IsEnabled = false;
             btnAdd.IsEnabled = false;
             btnEdit.IsEnabled = false;
             btnRemove.IsEnabled = false;
@@ -174,7 +189,7 @@ namespace SecretSantaHelper
             txtEmail.IsEnabled = true;
             txtName.IsEnabled = true;
             addClicked = false;
-            selectedParticipant = participants.FirstOrDefault(participant => participant.DisplayValue() == lstParticipants.SelectedItem.ToString());
+            selectedParticipant = santaSack.Participants.FirstOrDefault(participant => participant.DisplayValue() == lstParticipants.SelectedItem.ToString());
             if (selectedParticipant != null)
             {
                 txtEmail.Text = selectedParticipant.EmailAddress;
@@ -184,12 +199,12 @@ namespace SecretSantaHelper
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
         {
-            selectedParticipant = participants.FirstOrDefault(participant => participant.DisplayValue() == lstParticipants.SelectedItem.ToString());
+            selectedParticipant = santaSack.Participants.FirstOrDefault(participant => participant.DisplayValue() == lstParticipants.SelectedItem.ToString());
             if (selectedParticipant != null)
             {
-                participants.Remove(selectedParticipant);
+                santaSack.Participants.Remove(selectedParticipant);
                 lstParticipants.ItemsSource = null;
-                lstParticipants.ItemsSource = from participant in participants select participant.DisplayValue();
+                lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
             }
         }
 
@@ -218,30 +233,48 @@ namespace SecretSantaHelper
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtFromAddress.Text))
+            if (string.IsNullOrWhiteSpace(santaSack.Template.FromAddress))
             {
                 MessageBox.Show("You Haven't Entered A From Address");
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(santaSack.Template.Content))
+            {
+                MessageBox.Show("You Haven't Got Any Email Content");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(santaSack.Template.Subject))
+            {
+                MessageBox.Show("You Haven't Got An Email Subject");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(santaSack.Template.Host) || string.IsNullOrWhiteSpace(santaSack.Template.Port))
+            {
+                MessageBox.Show("You Haven't Got A Host Or Port For Sending");
+                return;
+            }
+
             var emailHelper = new RegexUtilities();
-            if (!emailHelper.IsValidEmail(txtFromAddress.Text))
+            if (!emailHelper.IsValidEmail(santaSack.Template.FromAddress))
             {
                 MessageBox.Show("You Haven't Entered A Valid From Address");
                 return;
             }
 
-            foreach (var participant in participants)
+            foreach (var participant in santaSack.Participants)
             {
-                if(!emailHelper.IsValidEmail(participant.EmailAddress))
+                if (!emailHelper.IsValidEmail(participant.EmailAddress))
                 {
                     MessageBox.Show(participant.Name + " Does Not Have A Valid Email Address");
                     return;
                 }
             }
 
-            var participantsToPair = (from p in participants select p).ToList();
-            var participantsToAssign = (from p in participants select p).ToList();
+            var participantsToPair = (from p in santaSack.Participants select p).ToList();
+            var participantsToAssign = (from p in santaSack.Participants select p).ToList();
             var participantsToSend = new List<PairedParticipant>();
             var randomGenerator = new Random();
 
@@ -249,8 +282,8 @@ namespace SecretSantaHelper
             {
                 if (participantsToAssign.Count == 1 && participantsToPair.Count == 1 && participantsToAssign.First().EmailAddress == participantsToPair.First().EmailAddress)
                 {
-                    participantsToPair = (from p in participants select p).ToList();
-                    participantsToAssign = (from p in participants select p).ToList();
+                    participantsToPair = (from p in santaSack.Participants select p).ToList();
+                    participantsToAssign = (from p in santaSack.Participants select p).ToList();
                     participantsToSend = new List<PairedParticipant>();
                 }
 
@@ -282,12 +315,12 @@ namespace SecretSantaHelper
 
                 var alreadyPaired =
                     participantsToSend.FirstOrDefault(p => p.PairedWith.EmailAddress == participantPairing.EmailAddress);
-                if(alreadyPaired != null)
+                if (alreadyPaired != null)
                 {
-                    if(alreadyPaired.EmailAddress == participantPairing.PairedWith.EmailAddress)
+                    if (alreadyPaired.EmailAddress == participantPairing.PairedWith.EmailAddress)
                     {
-                        participantsToPair = (from p in participants select p).ToList();
-                        participantsToAssign = (from p in participants select p).ToList();
+                        participantsToPair = (from p in santaSack.Participants select p).ToList();
+                        participantsToAssign = (from p in santaSack.Participants select p).ToList();
                         participantsToSend = new List<PairedParticipant>();
                     }
                 }
@@ -297,15 +330,37 @@ namespace SecretSantaHelper
             foreach (var pairedParticipant in participantsToSend)
             {
                 var message = new MailMessage();
-                message.From = new MailAddress(txtFromAddress.Text);
+                message.From = new MailAddress(santaSack.Template.FromAddress);
                 message.To.Add(new MailAddress(pairedParticipant.EmailAddress));
-                message.Subject = "Your Secret Santa has been selected";
-                message.Body = string.Format("Dear {0}\n\nSanta has selected you to purchase a gift for {1} {2}\n\nRemember:\n- You have a budget of £5 to spend on any gift you wish...the more outrageous, the better ;)\n- Gifts must be labelled and left under the Christmas tree on or before the 7th December\n\nOn 7th December @ The North Laine Pub, Santa’s sack will be out and you will receive your gift\n\nHappy spending!\n\nFrom Santa’s Elf", pairedParticipant.Name, pairedParticipant.PairedWith.Name, pairedParticipant.PairedWith.EmailAddress);
+                message.Subject = santaSack.Template.Subject;
+                message.Body = santaSack.Template.Content
+                    .Replace("{{GiftFromName}}", pairedParticipant.Name)
+                    .Replace("{{GiftFromEmail}}", pairedParticipant.EmailAddress)
+                    .Replace("{{GiftForName}}", pairedParticipant.PairedWith.Name)
+                    .Replace("{{GiftForEmail}}", pairedParticipant.PairedWith.EmailAddress);
                 var client = new SmtpClient();
+                client.Host = santaSack.Template.Host;
+                int port;
+                if (!int.TryParse(santaSack.Template.Port, out port))
+                {
+                    port = 25;
+                }
+                client.Port = port;
                 client.Send(message);
             }
 
             MessageBox.Show("All Emails Have Been Sent");
+        }
+        
+        private void btnSendDetails_Click(object sender, RoutedEventArgs e)
+        {
+            var sendDetails = new SendDetails(ref santaSack);
+            sendDetails.ShowDialog();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            SantaSackSerializer.Serialize(santaSack);
         }
     }
 }

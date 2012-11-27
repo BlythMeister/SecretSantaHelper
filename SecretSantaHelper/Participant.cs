@@ -5,6 +5,7 @@ using System.Text;
 
 namespace SecretSantaHelper
 {
+    [Serializable]
     public class Participant
     {
         public int Id { get; set; }
