@@ -1,6 +1,8 @@
 Secret Santa Helper
 =================
 
+Current Version: 0.0.2.0
+
 Small application which helps you to send out your secret santa emails.
 
 All you need to do is add the participants and their email addresses.
