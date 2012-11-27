@@ -75,7 +75,7 @@ namespace SecretSantaHelper
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    MessageBox.Show("Error: Could not write file to disk. Original error: " + ex.Message);
                 }
             }
         }
@@ -210,57 +210,40 @@ namespace SecretSantaHelper
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-
-            if (string.IsNullOrWhiteSpace(txtPassword.Password))
+            if (santaSack.Participants.Count < 3)
             {
-                MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
+                MessageBox.Show("You Haven't Got Enough People!");
                 return;
             }
-
-            try
-            {
-                var bytesToEncode = Encoding.UTF8.GetBytes(txtPassword.Password);
-                var encodedText = Convert.ToBase64String(bytesToEncode);
-                if (encodedText != "U2VjcmV0U2FudGE=")
-                {
-                    MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
-                }
-
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("You Haven't Entered The Password, Or It Is Incorrect");
-                return;
-            }
-
+            
             if (string.IsNullOrWhiteSpace(santaSack.Template.FromAddress))
             {
-                MessageBox.Show("You Haven't Entered A From Address");
+                MessageBox.Show("You Haven't Entered A From Address!");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(santaSack.Template.Content))
             {
-                MessageBox.Show("You Haven't Got Any Email Content");
+                MessageBox.Show("You Haven't Got Any Email Content!");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(santaSack.Template.Subject))
             {
-                MessageBox.Show("You Haven't Got An Email Subject");
+                MessageBox.Show("You Haven't Got An Email Subject!");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(santaSack.Template.Host) || string.IsNullOrWhiteSpace(santaSack.Template.Port))
             {
-                MessageBox.Show("You Haven't Got A Host Or Port For Sending");
+                MessageBox.Show("You Haven't Got A Host Or Port For Sending!");
                 return;
             }
 
             var emailHelper = new RegexUtilities();
             if (!emailHelper.IsValidEmail(santaSack.Template.FromAddress))
             {
-                MessageBox.Show("You Haven't Entered A Valid From Address");
+                MessageBox.Show("You Haven't Entered A Valid From Address!");
                 return;
             }
 
@@ -268,9 +251,17 @@ namespace SecretSantaHelper
             {
                 if (!emailHelper.IsValidEmail(participant.EmailAddress))
                 {
-                    MessageBox.Show(participant.Name + " Does Not Have A Valid Email Address");
+                    MessageBox.Show(participant.Name + " Does Not Have A Valid Email Address!");
                     return;
                 }
+            }
+
+            var rsltMessageBox = MessageBox.Show("Are You Sure You Want To Send Now?", "Are You Sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (rsltMessageBox == System.Windows.Forms.DialogResult.No)
+            {
+                MessageBox.Show("Sending Cancelled!");
+                return;
             }
 
             var participantsToPair = (from p in santaSack.Participants select p).ToList();
@@ -349,7 +340,7 @@ namespace SecretSantaHelper
                 client.Send(message);
             }
 
-            MessageBox.Show("All Emails Have Been Sent");
+            MessageBox.Show("All Emails Have Been Sent!");
         }
         
         private void btnSendDetails_Click(object sender, RoutedEventArgs e)

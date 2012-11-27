@@ -21,8 +21,6 @@
         <Button Content="Save" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="18,429,0,0" Name="btnSave" VerticalAlignment="Top" Width="92" Grid.Column="1" IsEnabled="False" Click="btnSave_Click" Background="#FF1C892C" Foreground="White" />
         <Button Content="Cancel" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" IsEnabled="False" Margin="116,429,0,0" Name="btnCancel" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnCancel_Click" Background="#FF1C892C" Foreground="White" />
         <Button Content="Edit Person" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,164,0,0" Name="btnEdit" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnEdit_Click" Background="#FF1C892C" Foreground="White" BorderBrush="#FF005F20" />
-        <Label Content="Send Password:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="0,23,0,0" Name="label3" VerticalAlignment="Top" Grid.Column="1" />
-        <PasswordBox Grid.Column="1" Height="28" HorizontalAlignment="Left" Margin="94,23,0,0" Name="txtPassword" VerticalAlignment="Top" Width="164" />
         <Button Background="#FF1C892C" BorderBrush="#FF005F20" Content="Send Details" FontFamily="Calibri" Foreground="White" Height="44" HorizontalAlignment="Left" Margin="167,64,0,0" Name="btnSendDetails" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnSendDetails_Click" />
     </Grid>
 </Window>
