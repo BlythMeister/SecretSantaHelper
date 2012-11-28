@@ -11,6 +11,7 @@ namespace SecretSantaHelper
         public string Host { get; set; }
         public string Port { get; set; }
         public string FromAddress { get; set; }
+        public string DiagnosticDeliveryAddress { get; set; }
         public string Subject { get; set; }
         public string Content { get; set; }
 
@@ -21,6 +22,7 @@ namespace SecretSantaHelper
             FromAddress = string.Empty;
             Subject = string.Empty;
             Content = string.Empty;
+            DiagnosticDeliveryAddress = string.Empty;
         }
     }
 }

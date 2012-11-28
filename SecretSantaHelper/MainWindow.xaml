@@ -22,5 +22,7 @@
         <Button Content="Cancel" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" IsEnabled="False" Margin="116,429,0,0" Name="btnCancel" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnCancel_Click" Background="#FF1C892C" Foreground="White" />
         <Button Content="Edit Person" FontFamily="Calibri" Height="44" HorizontalAlignment="Left" Margin="167,164,0,0" Name="btnEdit" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnEdit_Click" Background="#FF1C892C" Foreground="White" BorderBrush="#FF005F20" />
         <Button Background="#FF1C892C" BorderBrush="#FF005F20" Content="Send Details" FontFamily="Calibri" Foreground="White" Height="44" HorizontalAlignment="Left" Margin="167,64,0,0" Name="btnSendDetails" VerticalAlignment="Top" Width="92" Grid.Column="1" Click="btnSendDetails_Click" />
+        <Label Foreground="White" Height="28" HorizontalAlignment="Left" Margin="154,12,0,0" Name="lblVersion" VerticalAlignment="Top" Grid.Column="1" Width="108" Content="Version: 0.0.0.0" FontSize="14" />
+        <Image Height="51" HorizontalAlignment="Left" Name="image1" Stretch="Fill" VerticalAlignment="Top" Width="62" Source="/SecretSantaHelper;component/santa.ico" Margin="20,6,0,0" Grid.Column="1" />
     </Grid>
 </Window>

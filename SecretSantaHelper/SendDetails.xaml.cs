@@ -7,17 +7,18 @@ namespace SecretSantaHelper
     /// </summary>
     public partial class SendDetails : Window
     {
-        private readonly SantaSack templateDetails;
+        private readonly SantaSack santaSack;
 
-        public SendDetails(ref SantaSack templateDetails)
+        public SendDetails(ref SantaSack santaSack)
         {
-            this.templateDetails = templateDetails;
+            this.santaSack = santaSack;
             InitializeComponent();
-            txtSMTP.Text = templateDetails.Template.Host;
-            txtPort.Text = templateDetails.Template.Port;
-            txtFrom.Text = templateDetails.Template.FromAddress;
-            txtSubject.Text = templateDetails.Template.Subject;
-            txtContent.Text = templateDetails.Template.Content;
+            txtSMTP.Text = santaSack.Template.Host;
+            txtPort.Text = santaSack.Template.Port;
+            txtFrom.Text = santaSack.Template.FromAddress;
+            txtSubject.Text = santaSack.Template.Subject;
+            txtContent.Text = santaSack.Template.Content;
+            txtDiagnostic.Text = santaSack.Template.DiagnosticDeliveryAddress;
             btnDone.IsEnabled = true;
         }
 
@@ -35,16 +36,22 @@ namespace SecretSantaHelper
                 MessageBox.Show("That is an invalid from email address!");
                 return;
             }
+            if (!string.IsNullOrWhiteSpace(txtDiagnostic.Text) && !emailHelper.IsValidEmail(txtDiagnostic.Text))
+            {
+                MessageBox.Show("That is an invalid diagnostic email address!");
+                return;
+            }
             Close();
         }
 
         private void Window_Closed(object sender, System.EventArgs e)
         {
-            templateDetails.Template.Host = txtSMTP.Text;
-            templateDetails.Template.Port = txtPort.Text;
-            templateDetails.Template.FromAddress = txtFrom.Text;
-            templateDetails.Template.Subject = txtSubject.Text;
-            templateDetails.Template.Content = txtContent.Text;
+            santaSack.Template.Host = txtSMTP.Text;
+            santaSack.Template.Port = txtPort.Text;
+            santaSack.Template.FromAddress = txtFrom.Text;
+            santaSack.Template.Subject = txtSubject.Text;
+            santaSack.Template.Content = txtContent.Text;
+            santaSack.Template.DiagnosticDeliveryAddress = txtDiagnostic.Text;
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
+using Application = System.Windows.Forms.Application;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace SecretSantaHelper
@@ -15,7 +16,7 @@ namespace SecretSantaHelper
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
         private bool addClicked = false;
         private Participant selectedParticipant;
         private SantaSack santaSack;
@@ -23,6 +24,7 @@ namespace SecretSantaHelper
         public MainWindow()
         {
             InitializeComponent();
+            lblVersion.Content = string.Format("Version: {0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             santaSack = SantaSackSerializer.Deserialize();
             lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
         }
@@ -38,6 +40,11 @@ namespace SecretSantaHelper
 
             if (filePicker.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                if (MessageBox.Show("Do You Want To Clear Previous Items Before Importing?", "Clear Previous?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    santaSack.Participants.Clear();
+                }
+
                 try
                 {
                     var dataRead = File.ReadLines(filePicker.FileName);
@@ -60,6 +67,7 @@ namespace SecretSantaHelper
                     MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
                 }
             }
+            SantaSackSerializer.Serialize(santaSack);
         }
 
         private void btnExport_Click(object sender, RoutedEventArgs e)
@@ -85,7 +93,7 @@ namespace SecretSantaHelper
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             var emailHelper = new RegexUtilities();
-            if(!emailHelper.IsValidEmail(txtEmail.Text))
+            if (!emailHelper.IsValidEmail(txtEmail.Text))
             {
                 MessageBox.Show("That is an invalid email address!");
                 return;
@@ -136,6 +144,7 @@ namespace SecretSantaHelper
 
             lstParticipants.ItemsSource = null;
             lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
+            SantaSackSerializer.Serialize(santaSack);
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -206,16 +215,19 @@ namespace SecretSantaHelper
                 lstParticipants.ItemsSource = null;
                 lstParticipants.ItemsSource = from participant in santaSack.Participants select participant.DisplayValue();
             }
+            SantaSackSerializer.Serialize(santaSack);
         }
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
+            SantaSackSerializer.Serialize(santaSack);
+
             if (santaSack.Participants.Count < 3)
             {
                 MessageBox.Show("You Haven't Got Enough People!");
                 return;
             }
-            
+
             if (string.IsNullOrWhiteSpace(santaSack.Template.FromAddress))
             {
                 MessageBox.Show("You Haven't Entered A From Address!");
@@ -267,7 +279,7 @@ namespace SecretSantaHelper
             var participantsToPair = (from p in santaSack.Participants select p).ToList();
             var participantsToAssign = (from p in santaSack.Participants select p).ToList();
             var participantsToSend = new List<PairedParticipant>();
-            var randomGenerator = new Random();
+            var randomGenerator = new Random((int)DateTime.UtcNow.Ticks);
 
             while (participantsToPair.Count > 0)
             {
@@ -318,31 +330,58 @@ namespace SecretSantaHelper
 
             }
 
-            foreach (var pairedParticipant in participantsToSend)
+            while (participantsToSend.Any(x => x.Sent == false))
             {
-                var message = new MailMessage();
-                message.From = new MailAddress(santaSack.Template.FromAddress);
-                message.To.Add(new MailAddress(pairedParticipant.EmailAddress));
-                message.Subject = santaSack.Template.Subject;
-                message.Body = santaSack.Template.Content
-                    .Replace("{{GiftFromName}}", pairedParticipant.Name)
-                    .Replace("{{GiftFromEmail}}", pairedParticipant.EmailAddress)
-                    .Replace("{{GiftForName}}", pairedParticipant.PairedWith.Name)
-                    .Replace("{{GiftForEmail}}", pairedParticipant.PairedWith.EmailAddress);
-                var client = new SmtpClient();
-                client.Host = santaSack.Template.Host;
-                int port;
-                if (!int.TryParse(santaSack.Template.Port, out port))
+                if(participantsToSend.Any(x=>x.SendAttempts > 5))
                 {
-                    port = 25;
+                    foreach (var tooManyAttemptParticipant in participantsToSend.Where(x=>x.SendAttempts>5))
+                    {
+                        MessageBox.Show(
+                            string.Format("Couldn't Send Email To {0}, They Drew {1}",
+                                          tooManyAttemptParticipant.EmailAddress,
+                                          tooManyAttemptParticipant.PairedWith.EmailAddress), "Couldn't Send",
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
                 }
-                client.Port = port;
-                client.Send(message);
+
+                foreach (var pairedParticipant in participantsToSend.Where(x => x.Sent == false))
+                {
+                    var message = new MailMessage();
+                    message.From = new MailAddress(santaSack.Template.FromAddress);
+                    message.To.Add(!string.IsNullOrWhiteSpace(santaSack.Template.DiagnosticDeliveryAddress)
+                                       ? new MailAddress(santaSack.Template.DiagnosticDeliveryAddress)
+                                       : new MailAddress(pairedParticipant.EmailAddress));
+
+                    message.Subject = santaSack.Template.Subject;
+                    message.Body = santaSack.Template.Content
+                        .Replace("{{GiftFromName}}", pairedParticipant.Name)
+                        .Replace("{{GiftFromEmail}}", pairedParticipant.EmailAddress)
+                        .Replace("{{GiftForName}}", pairedParticipant.PairedWith.Name)
+                        .Replace("{{GiftForEmail}}", pairedParticipant.PairedWith.EmailAddress);
+                    var client = new SmtpClient();
+                    client.Host = santaSack.Template.Host;
+                    int port;
+                    if (!int.TryParse(santaSack.Template.Port, out port))
+                    {
+                        port = 25;
+                    }
+                    client.Port = port;
+                    try
+                    {
+                        client.Send(message);
+                        pairedParticipant.Sent = true;
+                    }
+                    catch (Exception)
+                    {
+                        pairedParticipant.Sent = false;
+                        pairedParticipant.SendAttempts++;
+                    }
+                }
             }
 
             MessageBox.Show("All Emails Have Been Sent!");
         }
-        
+
         private void btnSendDetails_Click(object sender, RoutedEventArgs e)
         {
             var sendDetails = new SendDetails(ref santaSack);
@@ -352,6 +391,11 @@ namespace SecretSantaHelper
         private void Window_Closed(object sender, EventArgs e)
         {
             SantaSackSerializer.Serialize(santaSack);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
