@@ -41,5 +41,8 @@ FifteenBelow/GDS/Host/app-bs-test.config
 Nuget/
 NugetFeed/
 Packages/
-build/scripts/TestResult.html
-build/scripts/TestResult.xml
+_TeamCity.*
+build/scripts/TestResult.*
+NuSpecsTemp
+warnings.log
+errors.log
