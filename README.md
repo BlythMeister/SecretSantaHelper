@@ -16,3 +16,8 @@ As a result, the minimum number of people is 3!
 Added features include the ability to save your list of participants to CSV, and read from CSV so you can send the list to different people.
 
 The application will store/remember all participants in the list, and also your send details settings
+
+Licence
+=================
+
+This application is covered by the GPLv2 licence agreement.
