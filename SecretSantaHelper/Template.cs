@@ -11,9 +11,13 @@ namespace SecretSantaHelper
         public string Host { get; set; }
         public string Port { get; set; }
         public string FromAddress { get; set; }
+        public string FromPassword { get; set; }
+        public string BlindCarbonCopy { get; set; }
         public string DiagnosticDeliveryAddress { get; set; }
         public string Subject { get; set; }
         public string Content { get; set; }
+        public bool EnableSsl { get; set; }
+
 
         public Template()
         {
@@ -23,6 +27,9 @@ namespace SecretSantaHelper
             Subject = string.Empty;
             Content = string.Empty;
             DiagnosticDeliveryAddress = string.Empty;
+            EnableSsl = false;
+            FromPassword = string.Empty;
+            BlindCarbonCopy = string.Empty;
         }
     }
 }

@@ -1,25 +1,34 @@
 ﻿<Window x:Class="SecretSantaHelper.SendDetails"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Secret Santa Helper Template Editor" Height="425" Width="409" Closed="Window_Closed" Icon="/SecretSantaHelper;component/santa.ico" WindowStyle="SingleBorderWindow">
-    <Grid Background="#FFA01717" Height="390" Width="392">
+        Title="Secret Santa Helper Template Editor" Height="467.667" Width="409" Closed="Window_Closed" Icon="/SecretSantaHelper;component/santa.ico" WindowStyle="SingleBorderWindow">
+    <Grid Background="#FFA01717" Width="392" Margin="4,3,5,3">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="383*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="340*" />
             <RowDefinition Height="40*" />
         </Grid.RowDefinitions>
-        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,10,123,0" Name="txtSMTP" VerticalAlignment="Top" Width="161" />
-        <Label Content="SMTP Server:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="27,12,0,0" Name="lblName" VerticalAlignment="Top" />
-        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,11,12,0" Name="txtPort" VerticalAlignment="Top" Width="64" />
-        <Label Content="Port:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="279,12,0,0" Name="label1" VerticalAlignment="Top" />
-        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,44,12,0" Name="txtFrom" VerticalAlignment="Top" Width="272" />
-        <Label Content="From Address:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="21,42,0,0" Name="label2" VerticalAlignment="Top" />
-        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,113,12,0" Name="txtSubject" VerticalAlignment="Top" Width="272" />
-        <Label Content="Subject:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="55,113,0,0" Name="label3" VerticalAlignment="Top" />
-        <TextBox Height="182" HorizontalAlignment="Right" IsEnabled="True" Margin="0,147,12,0" Name="txtContent" VerticalAlignment="Top" Width="272" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" />
-        <Label Content="Email Body:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="36,147,0,0" Name="label4" VerticalAlignment="Top" />
-        <TextBlock Height="111" HorizontalAlignment="Left" Margin="10,181,0,0" Name="textBlock1" Text="Tags: {{GiftFromName}} {{GiftFromEmail}} {{GiftForName}} {{GiftForEmail}}" VerticalAlignment="Top" Foreground="White" TextWrapping="Wrap" Width="99" />
-        <Button Background="#FF1C892C" BorderBrush="#FF005F20" Content="Done" FontFamily="Calibri" Foreground="White" Height="44" HorizontalAlignment="Left" Margin="122,337,0,0" Name="btnDone" VerticalAlignment="Top" Width="92" Click="btnDone_Click" Grid.RowSpan="2" />
-        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,78,12,0" Name="txtDiagnostic" VerticalAlignment="Top" Width="272" />
-        <Label Content="Diagnostic Delivery:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="-4,76,0,0" Name="label5" VerticalAlignment="Top" />
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,4,120,0" Name="txtSMTP" VerticalAlignment="Top" Width="161" Grid.Column="2" />
+        <Label Content="SMTP Server:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="23,4,0,0" Name="lblName" VerticalAlignment="Top" Grid.Column="2" />
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,37,217,0" Name="txtPort" VerticalAlignment="Top" Width="64" Grid.Column="2" />
+        <Label Content="Port:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="62,37,0,0" Name="label1" VerticalAlignment="Top" Grid.Column="2" />
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,72,9,0" Name="txtFrom" VerticalAlignment="Top" Width="272" Grid.Column="2" />
+        <Label Content="From Address:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="11,72,0,0" Name="label2" VerticalAlignment="Top" Grid.Column="2" />
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,206,9,0" Name="txtSubject" VerticalAlignment="Top" Width="272" Grid.Column="2" />
+        <Label Content="Subject:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="45,206,0,0" Name="label3" VerticalAlignment="Top" Grid.Column="2" />
+        <TextBox Height="182" HorizontalAlignment="Right" IsEnabled="True" Margin="0,239,9,0" Name="txtContent" VerticalAlignment="Top" Width="272" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" Grid.RowSpan="2" Grid.Column="2" />
+        <TextBlock Height="111" HorizontalAlignment="Left" Margin="4,248,0,0" x:Name="textBlock1" VerticalAlignment="Top" Foreground="White" TextWrapping="Wrap" Width="99" Grid.Column="2" ><Run Text="Email Body:"/><LineBreak/><Run Text="Tags:{{GiftFromName}} {{GiftFromEmail}} {{GiftForName}} {{GiftForEmail}}"/></TextBlock>
+        <Button Background="#FF1C892C" BorderBrush="#FF005F20" Content="Done" FontFamily="Calibri" Foreground="White" Height="44" HorizontalAlignment="Left" Margin="1,377,0,0" Name="btnDone" VerticalAlignment="Top" Width="92" Click="btnDone_Click" Grid.RowSpan="2" Grid.Column="2" />
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,173,9,0" Name="txtDiagnostic" VerticalAlignment="Top" Width="272" Grid.Column="2" />
+        <Label Content="Diagnostic Delivery:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="0,173,0,0" Name="label5" VerticalAlignment="Top" Grid.ColumnSpan="3" />
+        <CheckBox Content="Enable SSL" HorizontalAlignment="Left" Margin="179,45,0,0" Grid.Row="0" VerticalAlignment="Top" Name="enableSSL" Grid.Column="2"/>
+        <Label Content="From Password:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="4,105,0,0" x:Name="label2_Copy" VerticalAlignment="Top" Grid.Column="2" />
+        <PasswordBox HorizontalAlignment="Left" Margin="102,105,0,0" VerticalAlignment="Top" Width="272" Height="30" Name="txtFrom_Pass" Grid.Column="2"/>
+        <TextBox Height="28" HorizontalAlignment="Right" IsEnabled="True" Margin="0,140,9,0" x:Name="txtBlindCarbonCopy" VerticalAlignment="Top" Width="272" Grid.Column="2" />
+        <Label Content="BCC:" Foreground="White" Height="28" HorizontalAlignment="Left" Margin="13,138,0,0" x:Name="label2_Copy1" VerticalAlignment="Top" Grid.Column="2" />
     </Grid>
 </Window>

@@ -19,6 +19,9 @@ namespace SecretSantaHelper
             txtSubject.Text = santaSack.Template.Subject;
             txtContent.Text = santaSack.Template.Content;
             txtDiagnostic.Text = santaSack.Template.DiagnosticDeliveryAddress;
+            enableSSL.IsChecked = santaSack.Template.EnableSsl;
+            txtBlindCarbonCopy.Text = santaSack.Template.BlindCarbonCopy;
+            txtFrom_Pass.Password = santaSack.Template.FromPassword;
             btnDone.IsEnabled = true;
         }
 
@@ -52,6 +55,9 @@ namespace SecretSantaHelper
             santaSack.Template.Subject = txtSubject.Text;
             santaSack.Template.Content = txtContent.Text;
             santaSack.Template.DiagnosticDeliveryAddress = txtDiagnostic.Text;
+            santaSack.Template.FromPassword = txtFrom_Pass.Password;
+            santaSack.Template.EnableSsl = enableSSL.IsChecked.GetValueOrDefault();
+            santaSack.Template.BlindCarbonCopy = txtBlindCarbonCopy.Text;
         }
     }
 }

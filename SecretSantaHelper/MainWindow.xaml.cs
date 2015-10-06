@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Windows;
@@ -16,7 +17,6 @@ namespace SecretSantaHelper
     /// </summary>
     public partial class MainWindow : Window
     {
-
         private bool addClicked = false;
         private Participant selectedParticipant;
         private SantaSack santaSack;
@@ -332,9 +332,9 @@ namespace SecretSantaHelper
 
             while (participantsToSend.Any(x => x.Sent == false))
             {
-                if(participantsToSend.Any(x=>x.SendAttempts > 5))
+                if (participantsToSend.Any(x => x.SendAttempts > 5))
                 {
-                    foreach (var tooManyAttemptParticipant in participantsToSend.Where(x=>x.SendAttempts>5))
+                    foreach (var tooManyAttemptParticipant in participantsToSend.Where(x => x.SendAttempts > 5))
                     {
                         MessageBox.Show(
                             string.Format("Couldn't Send Email To {0}, They Drew {1}",
@@ -352,14 +352,33 @@ namespace SecretSantaHelper
                                        ? new MailAddress(santaSack.Template.DiagnosticDeliveryAddress)
                                        : new MailAddress(pairedParticipant.EmailAddress));
 
+                    // send to a bcc if no diagnostic delivery is set
+                    if (!string.IsNullOrWhiteSpace(santaSack.Template.BlindCarbonCopy) 
+                        && string.IsNullOrWhiteSpace(santaSack.Template.DiagnosticDeliveryAddress))
+                    {
+                        message.Bcc.Add(new MailAddress(santaSack.Template.BlindCarbonCopy));    
+                    }
+
+                    message.BodyEncoding = Encoding.UTF8;
                     message.Subject = santaSack.Template.Subject;
                     message.Body = santaSack.Template.Content
                         .Replace("{{GiftFromName}}", pairedParticipant.Name)
                         .Replace("{{GiftFromEmail}}", pairedParticipant.EmailAddress)
                         .Replace("{{GiftForName}}", pairedParticipant.PairedWith.Name)
                         .Replace("{{GiftForEmail}}", pairedParticipant.PairedWith.EmailAddress);
-                    var client = new SmtpClient();
+                    var client = new SmtpClient { EnableSsl = santaSack.Template.EnableSsl };
+                    
+
+                    if (!string.IsNullOrWhiteSpace(santaSack.Template.FromPassword))
+                    {
+                        client.UseDefaultCredentials = false;
+                        client.Credentials = new NetworkCredential(santaSack.Template.FromAddress, santaSack.Template.FromPassword);
+                        client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        message.DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure;
+                    }
+
                     client.Host = santaSack.Template.Host;
+
                     int port;
                     if (!int.TryParse(santaSack.Template.Port, out port))
                     {
